@@ -3,6 +3,7 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import { Card } from '../../components/Card/Card';
 import { Input } from '../../components/Input/Input';
 import { Button } from '../../components/Button/Button';
+import { ThemeToggle } from '../../components/ThemeToggle/ThemeToggle';
 import { login, createUser, ApiError } from '../../services/api';
 import { setToken, getToken } from '../../services/authStorage';
 import styles from './Login.module.css';
@@ -82,6 +83,9 @@ export function Login() {
     <div className={styles.container}>
       <Card className={styles.card}>
         <div className={styles.header}>
+          <div className={styles.themeToggleWrapper}>
+            <ThemeToggle />
+          </div>
           <h1 className={styles.title}>DevBoard</h1>
           <p className={styles.subtitle}>
             {authMode === 'login' ? 'Sign in to your account' : 'Create a new account'}
