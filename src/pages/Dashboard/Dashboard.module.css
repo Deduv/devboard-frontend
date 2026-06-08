@@ -25,6 +25,22 @@
   color: var(--color-text-primary);
 }
 
+.titleButton {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: opacity 0.2s ease;
+}
+
+.titleButton:hover {
+  opacity: 0.8;
+}
+
 .main {
   padding: var(--space-6);
   width: 100%;

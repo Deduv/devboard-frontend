@@ -258,7 +258,15 @@ export function Dashboard() {
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <h1 className={styles.title}>Dashboard</h1>
+        <h1 className={styles.title}>
+          <button 
+            className={styles.titleButton}
+            onClick={() => { setActiveView('projects'); setSelectedProjectId(null); }}
+            aria-label="Return to main dashboard"
+          >
+            Dashboard
+          </button>
+        </h1>
         <div className={styles.headerActions}>
           <Button variant="primary" onClick={() => setModalState('select')}>+ New</Button>
           <ThemeToggle />
