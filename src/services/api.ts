@@ -1,6 +1,7 @@
 import { LoginResponse } from '../types/auth';
 import { Project, ProjectListResponse } from '../types/project';
 import { Task, TaskListResponse } from '../types/task';
+import { OrganizationListResponse } from '../types/organization';
 import { getToken } from './authStorage';
 
 const API_BASE_URL = 'https://api.labprojects.dev.br';
@@ -51,9 +52,29 @@ export async function createUser(email: string, password: string): Promise<void>
   }
 }
 
-export async function getProjects(): Promise<ProjectListResponse> {
+export async function getOrganizations(): Promise<OrganizationListResponse> {
   const token = getToken();
-  const response = await fetch(`${API_BASE_URL}/api/v1/projects/`, {
+  const response = await fetch(`${API_BASE_URL}/api/v1/organizations/`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Falha ao buscar organizações. (Status: ${response.status})`);
+  }
+
+  return response.json();
+}
+
+export async function getProjects(organizationId?: number): Promise<ProjectListResponse> {
+  const token = getToken();
+  let url = `${API_BASE_URL}/api/v1/projects/`;
+  if (organizationId !== undefined) {
+    url += `?organization_id=${organizationId}`;
+  }
+  
+  const response = await fetch(url, {
     headers: {
       'Authorization': `Bearer ${token}`,
     },
@@ -81,15 +102,26 @@ export async function getTasks(): Promise<TaskListResponse> {
   return response.json();
 }
 
-export async function createProject(name: string, description: string): Promise<Project> {
+type CreateProjectPayload = {
+  name: string;
+  description?: string;
+  organization_id?: number;
+};
+
+export async function createProject(name: string, description: string, organizationId?: number): Promise<Project> {
   const token = getToken();
+  const payload: CreateProjectPayload = { name, description };
+  if (organizationId !== undefined) {
+    payload.organization_id = organizationId;
+  }
+  
   const response = await fetch(`${API_BASE_URL}/api/v1/projects/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
     },
-    body: JSON.stringify({ name, description }),
+    body: JSON.stringify(payload),
   });
 
   if (!response.ok) {

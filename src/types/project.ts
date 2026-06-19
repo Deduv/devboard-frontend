@@ -4,6 +4,7 @@ export interface Project {
   description: string | null;
   created_at: string;
   owner_id: number;
+  organization_id: number;
 }
 
 export interface ProjectListResponse {

@@ -1,4 +1,4 @@
-import { useEffect, useState, FormEvent } from 'react';
+import { useEffect, useState, FormEvent, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ThemeToggle } from '../../components/ThemeToggle/ThemeToggle';
 import { Card } from '../../components/Card/Card';
@@ -6,9 +6,11 @@ import { Button } from '../../components/Button/Button';
 import { Input } from '../../components/Input/Input';
 import { ConfirmDialog } from '../../components/ConfirmDialog/ConfirmDialog';
 import { clearToken } from '../../services/authStorage';
-import { getProjects, getTasks, createProject, createTask, updateTask, deleteProject, deleteTask } from '../../services/api';
+import { getOrganizations, getProjects, getTasks, createProject, createTask, updateTask, deleteProject, deleteTask } from '../../services/api';
+import { getActiveOrganizationId, setActiveOrganizationId, clearActiveOrganizationId } from '../../services/workspaceStorage';
 import { Project } from '../../types/project';
 import { Task, TaskStatus } from '../../types/task';
+import { Organization } from '../../types/organization';
 import styles from './Dashboard.module.css';
 
 type ModalState = 'none' | 'select' | 'project' | 'task';
@@ -27,10 +29,17 @@ const PRIORITY_WEIGHT: Record<string, number> = {
 
 type PendingDelete = { type: 'project' | 'task'; id: number } | null;
 
+const filterTasksByProjectIds = (allTasks: Task[], currentProjects: Project[]) => {
+  const projectIds = new Set(currentProjects.map(p => p.id));
+  return allTasks.filter(t => projectIds.has(t.project_id));
+};
+
 export function Dashboard() {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [activeOrganizationId, setActiveOrganizationIdState] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -62,29 +71,97 @@ export function Dashboard() {
   const [pendingDelete, setPendingDelete] = useState<PendingDelete>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const fetchDashboardData = async () => {
+  const loadRequestId = useRef(0);
+
+  const handleLogout = useCallback(() => {
+    clearToken();
+    navigate('/login', { replace: true });
+  }, [navigate]);
+
+  const loadProjectsAndTasksForWorkspace = useCallback(async (orgId: number | null) => {
+    const currentRequestId = ++loadRequestId.current;
+    
+    if (!orgId) {
+      setProjects([]);
+      setTasks([]);
+      setLoading(false);
+      return;
+    }
     try {
-      setLoading(true);
-      setError(null);
       const [projectsRes, tasksRes] = await Promise.all([
-        getProjects(),
+        getProjects(orgId),
         getTasks(),
       ]);
+      
+      if (currentRequestId !== loadRequestId.current) return;
+      
       setProjects(projectsRes.data);
-      setTasks(tasksRes.data);
+      setTasks(filterTasksByProjectIds(tasksRes.data, projectsRes.data));
     } catch (err) {
-      setError('Não foi possível carregar os dados. Verifique sua conexão ou tente logar novamente.');
+      if (currentRequestId !== loadRequestId.current) return;
+      setError('Não foi possível carregar os dados do workspace.');
       if (err instanceof Error && err.message.includes('401')) {
-         handleLogout();
+        handleLogout();
       }
     } finally {
-      setLoading(false);
+      if (currentRequestId === loadRequestId.current) {
+        setLoading(false);
+      }
     }
-  };
+  }, [handleLogout]);
 
   useEffect(() => {
+    const loadOrganizations = async (): Promise<Organization[]> => {
+      try {
+        const res = await getOrganizations();
+        setOrganizations(res.data);
+        return res.data;
+      } catch (err) {
+        if (err instanceof Error && err.message.includes('401')) {
+          handleLogout();
+        }
+        return [];
+      }
+    };
+
+    const resolveActiveOrganizationId = (orgs: Organization[]): number | null => {
+      if (orgs.length === 0) {
+        clearActiveOrganizationId();
+        return null;
+      }
+      const savedId = getActiveOrganizationId();
+      if (savedId && orgs.some(o => o.id === savedId)) {
+        return savedId;
+      }
+      const newId = orgs[0].id;
+      setActiveOrganizationId(newId);
+      return newId;
+    };
+
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const orgs = await loadOrganizations();
+        const activeId = resolveActiveOrganizationId(orgs);
+        setActiveOrganizationIdState(activeId);
+        await loadProjectsAndTasksForWorkspace(activeId);
+      } catch {
+        // Errors handled in inner functions
+      }
+    };
+
     fetchDashboardData();
-  }, []);
+  }, [handleLogout, loadProjectsAndTasksForWorkspace]);
+
+  const handleOrganizationChange = (newOrgId: number) => {
+    setActiveOrganizationIdState(newOrgId);
+    setActiveOrganizationId(newOrgId);
+    setSelectedProjectId(null);
+    setActiveView('projects');
+    setLoading(true);
+    loadProjectsAndTasksForWorkspace(newOrgId);
+  };
 
   useEffect(() => {
     if (taskStatusFilter === 'All') return;
@@ -99,21 +176,20 @@ export function Dashboard() {
     }
   }, [selectedProjectId, tasks, taskStatusFilter]);
 
-  const handleLogout = () => {
-    clearToken();
-    navigate('/login', { replace: true });
-  };
-
   const handleCreateProject = async (e: FormEvent) => {
     e.preventDefault();
+    if (!activeOrganizationId) {
+      setCreateProjectError('Nenhum workspace ativo. Selecione ou crie um workspace.');
+      return;
+    }
     setIsCreatingProject(true);
     setCreateProjectError(null);
 
     try {
-      await createProject(newProjectName, newProjectDesc);
+      await createProject(newProjectName, newProjectDesc, activeOrganizationId);
       setNewProjectName('');
       setNewProjectDesc('');
-      const projectsRes = await getProjects();
+      const projectsRes = await getProjects(activeOrganizationId);
       setProjects(projectsRes.data);
       setModalState('none');
     } catch (err) {
@@ -145,7 +221,7 @@ export function Dashboard() {
       setNewTaskPriority('MEDIUM');
       
       const tasksRes = await getTasks();
-      setTasks(tasksRes.data);
+      setTasks(filterTasksByProjectIds(tasksRes.data, projects));
       setModalState('none');
     } catch (err) {
       if (err instanceof Error) {
@@ -170,7 +246,7 @@ export function Dashboard() {
         status: newStatus
       });
       const tasksRes = await getTasks();
-      setTasks(tasksRes.data);
+      setTasks(filterTasksByProjectIds(tasksRes.data, projects));
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -203,9 +279,12 @@ export function Dashboard() {
         await deleteTask(pendingDelete.id);
       }
       
-      const [projectsRes, tasksRes] = await Promise.all([getProjects(), getTasks()]);
+      const [projectsRes, tasksRes] = await Promise.all([
+        activeOrganizationId ? getProjects(activeOrganizationId) : Promise.resolve({ data: [], total: 0, skip: 0, limit: 0 }), 
+        getTasks()
+      ]);
       setProjects(projectsRes.data);
-      setTasks(tasksRes.data);
+      setTasks(filterTasksByProjectIds(tasksRes.data, projectsRes.data));
       
       setPendingDelete(null);
     } catch (err) {
@@ -268,7 +347,29 @@ export function Dashboard() {
           </button>
         </h1>
         <div className={styles.headerActions}>
-          <Button variant="primary" onClick={() => setModalState('select')}>+ New</Button>
+          {organizations.length > 0 ? (
+            <select
+              className={styles.workspaceSelector}
+              value={activeOrganizationId || ''}
+              onChange={(e) => handleOrganizationChange(Number(e.target.value))}
+              aria-label="Select workspace"
+            >
+              {organizations.map(org => (
+                <option key={org.id} value={org.id}>
+                  {org.name}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <span className={styles.noWorkspaceMsg}>Nenhum workspace</span>
+          )}
+          <Button variant="primary" onClick={() => {
+            if (!activeOrganizationId) {
+              setError("Você precisa de um workspace para criar projetos.");
+              return;
+            }
+            setModalState('select');
+          }}>+ New</Button>
           <ThemeToggle />
           <Button variant="secondary" onClick={handleLogout}>Logout</Button>
         </div>
