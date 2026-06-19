@@ -1,0 +1,152 @@
+.container {
+  min-height: 100vh;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-6);
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.headerActions {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.main {
+  flex: 1;
+  padding: var(--space-6);
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.formContainer {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.form {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-end;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+}
+
+.inputGroup label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.input, .select {
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  height: 38px;
+}
+
+.loadingState, .emptyState, .errorState {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.errorState {
+  color: var(--color-danger);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-4);
+}
+
+.inviteCard {
+  padding: var(--space-4);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.inviteEmail {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.inviteMeta {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.badgeRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-2);
+}
+
+.badges {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.badge {
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: bold;
+  background-color: var(--color-accent);
+  color: white;
+}
+
+.badgeOWNER { background-color: #6c5ce7; }
+.badgeADMIN { background-color: #00b894; }
+.badgeMEMBER { background-color: #0984e3; }
+
+.statusPENDING { background-color: #f39c12; }
+.statusACCEPTED { background-color: #2ecc71; }
+.statusEXPIRED { background-color: #95a5a6; }
+.statusREVOKED { background-color: #e74c3c; }
+
+.formError {
+  color: var(--color-danger);
+  font-size: 14px;
+  margin-top: var(--space-3);
+}

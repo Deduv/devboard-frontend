@@ -2,6 +2,8 @@ import { LoginResponse } from '../types/auth';
 import { Project, ProjectListResponse } from '../types/project';
 import { Task, TaskListResponse } from '../types/task';
 import { OrganizationListResponse } from '../types/organization';
+import { OrganizationMemberListResponse } from '../types/member';
+import { OrganizationInvite, OrganizationInviteListResponse } from '../types/invite';
 import { getToken } from './authStorage';
 
 const API_BASE_URL = 'https://api.labprojects.dev.br';
@@ -65,6 +67,94 @@ export async function getOrganizations(): Promise<OrganizationListResponse> {
   }
 
   return response.json();
+}
+
+export async function getOrganizationMembers(organizationId: number): Promise<OrganizationMemberListResponse> {
+  const token = getToken();
+  const response = await fetch(`${API_BASE_URL}/api/v1/organizations/${organizationId}/members`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    if (response.status === 403 || response.status === 404) {
+      throw new Error(`WorkspaceAccessError: ${response.status}`);
+    }
+    throw new Error(`Falha ao buscar membros da organização. (Status: ${response.status})`);
+  }
+
+  const data = await response.json();
+  if (Array.isArray(data)) {
+    return { data, total: data.length };
+  }
+  return data;
+}
+
+export async function getOrganizationInvites(organizationId: number): Promise<OrganizationInviteListResponse> {
+  const token = getToken();
+  const response = await fetch(`${API_BASE_URL}/api/v1/organizations/${organizationId}/invites`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    if (response.status === 403 || response.status === 404) {
+      throw new Error(`WorkspaceAccessError: ${response.status}`);
+    }
+    throw new Error(`Falha ao buscar convites da organização. (Status: ${response.status})`);
+  }
+
+  const data = await response.json();
+  if (Array.isArray(data)) {
+    return { data, total: data.length };
+  }
+  return data;
+}
+
+export async function createOrganizationInvite(organizationId: number, email: string, role: string): Promise<OrganizationInvite> {
+  const token = getToken();
+  const response = await fetch(`${API_BASE_URL}/api/v1/organizations/${organizationId}/invites`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ email, role }),
+  });
+
+  if (!response.ok) {
+    if (response.status === 403) {
+      throw new Error(`WorkspaceAccessError: 403`);
+    }
+    if (response.status === 404) {
+      throw new Error(`WorkspaceAccessError: 404`);
+    }
+    throw new Error(`Falha ao criar convite. (Status: ${response.status})`);
+  }
+
+  return response.json();
+}
+
+export async function revokeOrganizationInvite(organizationId: number, inviteId: number): Promise<void> {
+  const token = getToken();
+  const response = await fetch(`${API_BASE_URL}/api/v1/organizations/${organizationId}/invites/${inviteId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    if (response.status === 403) {
+      throw new Error(`WorkspaceAccessError: 403`);
+    }
+    if (response.status === 404) {
+      throw new Error(`WorkspaceAccessError: 404`);
+    }
+    throw new Error(`Falha ao revogar convite. (Status: ${response.status})`);
+  }
 }
 
 export async function getProjects(organizationId?: number): Promise<ProjectListResponse> {

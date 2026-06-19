@@ -370,6 +370,12 @@ export function Dashboard() {
             }
             setModalState('select');
           }}>+ New</Button>
+          <Button variant="secondary" onClick={() => navigate('/members')}>
+            Members
+          </Button>
+          <Button variant="secondary" onClick={() => navigate('/invitations')}>
+            Invitations
+          </Button>
           <ThemeToggle />
           <Button variant="secondary" onClick={handleLogout}>Logout</Button>
         </div>

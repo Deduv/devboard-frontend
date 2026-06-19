@@ -1,0 +1,103 @@
+.container {
+  min-height: 100vh;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-6);
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.headerActions {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.main {
+  flex: 1;
+  padding: var(--space-6);
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.loadingState, .emptyState, .errorState {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.errorState {
+  color: var(--color-danger);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-4);
+}
+
+.memberCard {
+  padding: var(--space-4);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.memberName {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.memberEmail {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.memberRole {
+  align-self: flex-start;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: bold;
+  background-color: var(--color-accent);
+  color: white;
+}
+
+.roleOWNER {
+  background-color: #6c5ce7;
+}
+
+.roleADMIN {
+  background-color: #00b894;
+}
+
+.roleMEMBER {
+  background-color: #0984e3;
+}
