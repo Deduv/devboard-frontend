@@ -6,11 +6,12 @@ import { Button } from '../../components/Button/Button';
 import { Input } from '../../components/Input/Input';
 import { ConfirmDialog } from '../../components/ConfirmDialog/ConfirmDialog';
 import { clearToken } from '../../services/authStorage';
-import { getOrganizations, getProjects, getTasks, createProject, createTask, updateTask, deleteProject, deleteTask } from '../../services/api';
+import { getOrganizations, getProjects, getTasks, getOrganizationMembers, createProject, createTask, updateTask, deleteProject, deleteTask } from '../../services/api';
 import { getActiveOrganizationId, setActiveOrganizationId, clearActiveOrganizationId } from '../../services/workspaceStorage';
 import { Project } from '../../types/project';
 import { Task, TaskStatus } from '../../types/task';
 import { Organization } from '../../types/organization';
+import { OrganizationMember } from '../../types/member';
 import styles from './Dashboard.module.css';
 
 type ModalState = 'none' | 'select' | 'project' | 'task';
@@ -39,6 +40,7 @@ export function Dashboard() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [members, setMembers] = useState<OrganizationMember[]>([]);
   const [activeOrganizationId, setActiveOrganizationIdState] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,6 +64,7 @@ export function Dashboard() {
   const [newTaskDesc, setNewTaskDesc] = useState('');
   const [newTaskProjectId, setNewTaskProjectId] = useState<number | ''>('');
   const [newTaskPriority, setNewTaskPriority] = useState<string>('MEDIUM');
+  const [newTaskAssignedUserId, setNewTaskAssignedUserId] = useState<number | ''>('');
   const [isCreatingTask, setIsCreatingTask] = useState(false);
   const [createTaskError, setCreateTaskError] = useState<string | null>(null);
 
@@ -88,15 +91,17 @@ export function Dashboard() {
       return;
     }
     try {
-      const [projectsRes, tasksRes] = await Promise.all([
+      const [projectsRes, tasksRes, membersRes] = await Promise.all([
         getProjects(orgId),
         getTasks(),
+        getOrganizationMembers(orgId).catch(() => ({ data: [] }))
       ]);
       
       if (currentRequestId !== loadRequestId.current) return;
       
       setProjects(projectsRes.data);
       setTasks(filterTasksByProjectIds(tasksRes.data, projectsRes.data));
+      setMembers(membersRes.data || []);
     } catch (err) {
       if (currentRequestId !== loadRequestId.current) return;
       setError('Não foi possível carregar os dados do workspace.');
@@ -214,11 +219,13 @@ export function Dashboard() {
     setCreateTaskError(null);
 
     try {
-      await createTask(newTaskTitle, newTaskDesc, Number(newTaskProjectId), newTaskPriority);
+      const assignedId = newTaskAssignedUserId === '' ? null : newTaskAssignedUserId;
+      await createTask(newTaskTitle, newTaskDesc, Number(newTaskProjectId), newTaskPriority, assignedId);
       setNewTaskTitle('');
       setNewTaskDesc('');
       setNewTaskProjectId('');
       setNewTaskPriority('MEDIUM');
+      setNewTaskAssignedUserId('');
       
       const tasksRes = await getTasks();
       setTasks(filterTasksByProjectIds(tasksRes.data, projects));
@@ -234,7 +241,7 @@ export function Dashboard() {
     }
   };
 
-  const handleUpdateTaskStatus = async (task: Task, newStatus: TaskStatus) => {
+  const handleUpdateTask = async (task: Task, updates: Partial<Task>) => {
     setUpdatingTaskId(task.id);
     setError(null);
     try {
@@ -243,7 +250,8 @@ export function Dashboard() {
         description: task.description,
         priority: task.priority,
         assigned_user_id: task.assigned_user_id,
-        status: newStatus
+        status: task.status,
+        ...updates
       });
       const tasksRes = await getTasks();
       setTasks(filterTasksByProjectIds(tasksRes.data, projects));
@@ -525,6 +533,13 @@ export function Dashboard() {
                     {sortedTasks.map((t) => {
                       const projectForTask = projects.find(p => p.id === t.project_id);
                       const projectName = projectForTask ? projectForTask.name : 'Unknown';
+                      
+                      let assignedToText = 'Unassigned';
+                      if (t.assigned_user_id !== null) {
+                        const member = members.find(m => m.user_id === t.assigned_user_id);
+                        assignedToText = member ? `User ID: ${member.user_id}` : 'Unknown member';
+                      }
+
                       return (
                         <li key={t.id} className={styles.listItem}>
                           <div className={styles.itemRow}>
@@ -545,15 +560,30 @@ export function Dashboard() {
                                   </span>
                                 )}
                               </div>
-                              <div className={styles.itemSubtitle}>Project: {projectName}</div>
+                              <div className={styles.itemSubtitle}>
+                                Project: {projectName} &bull; Assigned to: {assignedToText}
+                              </div>
                             </div>
                             
                             <div className={styles.taskActions}>
+                              <select
+                                className={styles.statusSelect}
+                                value={t.assigned_user_id === null ? '' : t.assigned_user_id}
+                                disabled={updatingTaskId === t.id}
+                                onChange={(e) => handleUpdateTask(t, { assigned_user_id: e.target.value === '' ? null : Number(e.target.value) })}
+                                aria-label="Assign Task"
+                              >
+                                <option value="">Unassigned</option>
+                                {members.map((m) => (
+                                  <option key={m.user_id} value={m.user_id}>User ID: {m.user_id}</option>
+                                ))}
+                              </select>
                               <select 
                                 className={styles.statusSelect}
                                 value={t.status}
                                 disabled={updatingTaskId === t.id}
-                                onChange={(e) => handleUpdateTaskStatus(t, e.target.value as TaskStatus)}
+                                onChange={(e) => handleUpdateTask(t, { status: e.target.value as TaskStatus })}
+                                aria-label="Task Status"
                               >
                                 <option value="TODO">TODO</option>
                                 <option value="DOING">DOING</option>
@@ -695,6 +725,20 @@ export function Dashboard() {
                     <option value="MEDIUM">Medium</option>
                     <option value="HIGH">High</option>
                     <option value="CRITICAL">Critical</option>
+                  </select>
+                </div>
+
+                <div className={styles.fieldGroup}>
+                  <label className={styles.label}>Assignee</label>
+                  <select 
+                    className={styles.select} 
+                    value={newTaskAssignedUserId} 
+                    onChange={(e) => setNewTaskAssignedUserId(e.target.value === '' ? '' : Number(e.target.value))}
+                  >
+                    <option value="">Unassigned</option>
+                    {members.map((m) => (
+                      <option key={m.user_id} value={m.user_id}>User ID: {m.user_id}</option>
+                    ))}
                   </select>
                 </div>
 

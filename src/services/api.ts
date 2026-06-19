@@ -262,26 +262,42 @@ export async function createProject(name: string, description: string, organizat
   return response.json();
 }
 
+type CreateTaskPayload = {
+  title: string;
+  description: string;
+  project_id: number;
+  priority: string;
+  status: string;
+  assigned_user_id?: number | null;
+};
+
 export async function createTask(
   title: string, 
   description: string, 
   project_id: number, 
-  priority: string
+  priority: string,
+  assigned_user_id?: number | null
 ): Promise<Task> {
   const token = getToken();
+  const payload: CreateTaskPayload = {
+    title, 
+    description, 
+    project_id, 
+    priority,
+    status: 'TODO'
+  };
+  
+  if (assigned_user_id !== undefined) {
+    payload.assigned_user_id = assigned_user_id;
+  }
+
   const response = await fetch(`${API_BASE_URL}/api/v1/tasks/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
     },
-    body: JSON.stringify({ 
-      title, 
-      description, 
-      project_id, 
-      priority,
-      status: 'TODO'
-    }),
+    body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
