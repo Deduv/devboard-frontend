@@ -191,8 +191,7 @@ export function Dashboard() {
       await createProject(newProjectName, newProjectDesc, activeOrganizationId);
       setNewProjectName('');
       setNewProjectDesc('');
-      const projectsRes = await getProjects(activeOrganizationId);
-      setProjects(projectsRes.data);
+      await loadProjectsAndTasksForWorkspace(activeOrganizationId);
       setModalState('none');
     } catch (err) {
       if (err instanceof Error) {
@@ -224,8 +223,7 @@ export function Dashboard() {
       setNewTaskPriority('MEDIUM');
       setNewTaskAssignedUserId('');
       
-      const tasksRes = await getTasks(activeOrganizationId || undefined);
-      setTasks(tasksRes.data);
+      await loadProjectsAndTasksForWorkspace(activeOrganizationId);
       setModalState('none');
     } catch (err) {
       if (err instanceof Error) {
@@ -250,8 +248,7 @@ export function Dashboard() {
         status: task.status,
         ...updates
       });
-      const tasksRes = await getTasks(activeOrganizationId || undefined);
-      setTasks(tasksRes.data);
+      await loadProjectsAndTasksForWorkspace(activeOrganizationId);
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -284,12 +281,7 @@ export function Dashboard() {
         await deleteTask(pendingDelete.id);
       }
       
-      const [projectsRes, tasksRes] = await Promise.all([
-        activeOrganizationId ? getProjects(activeOrganizationId) : Promise.resolve({ data: [], total: 0, skip: 0, limit: 0 }), 
-        activeOrganizationId ? getTasks(activeOrganizationId) : Promise.resolve({ data: [], total: 0, skip: 0, limit: 0 })
-      ]);
-      setProjects(projectsRes.data);
-      setTasks(tasksRes.data);
+      await loadProjectsAndTasksForWorkspace(activeOrganizationId);
       
       setPendingDelete(null);
     } catch (err) {
@@ -308,6 +300,13 @@ export function Dashboard() {
     setCreateProjectError(null);
     setCreateTaskError(null);
   };
+
+  // Derived Metrics
+  const totalProjects = projects.length;
+  const totalTasks = tasks.length;
+  const todoTasks = tasks.filter(t => t.status === 'TODO').length;
+  const doingTasks = tasks.filter(t => t.status === 'DOING').length;
+  const doneTasks = tasks.filter(t => t.status === 'DONE').length;
 
   // Derived Data
   const sortedProjects = [...projects].sort((a, b) => {
@@ -401,23 +400,23 @@ export function Dashboard() {
             {activeOrganizationId && (
               <div className={styles.metricsGrid}>
                 <div className={styles.metricCard}>
-                  <div className={styles.metricValue}>{projects.length}</div>
+                  <div className={styles.metricValue}>{totalProjects}</div>
                   <div className={styles.metricLabel}>Projects</div>
                 </div>
                 <div className={styles.metricCard}>
-                  <div className={styles.metricValue}>{tasks.length}</div>
+                  <div className={styles.metricValue}>{totalTasks}</div>
                   <div className={styles.metricLabel}>Tasks</div>
                 </div>
                 <div className={styles.metricCard}>
-                  <div className={styles.metricValue}>{tasks.filter(t => t.status === 'TODO').length}</div>
+                  <div className={styles.metricValue}>{todoTasks}</div>
                   <div className={styles.metricLabel}>TODO</div>
                 </div>
                 <div className={styles.metricCard}>
-                  <div className={styles.metricValue}>{tasks.filter(t => t.status === 'DOING').length}</div>
+                  <div className={styles.metricValue}>{doingTasks}</div>
                   <div className={styles.metricLabel}>Doing</div>
                 </div>
                 <div className={styles.metricCard}>
-                  <div className={styles.metricValue}>{tasks.filter(t => t.status === 'DONE').length}</div>
+                  <div className={styles.metricValue}>{doneTasks}</div>
                   <div className={styles.metricLabel}>Done</div>
                 </div>
               </div>
