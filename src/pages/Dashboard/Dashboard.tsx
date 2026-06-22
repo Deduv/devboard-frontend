@@ -30,10 +30,7 @@ const PRIORITY_WEIGHT: Record<string, number> = {
 
 type PendingDelete = { type: 'project' | 'task'; id: number } | null;
 
-const filterTasksByProjectIds = (allTasks: Task[], currentProjects: Project[]) => {
-  const projectIds = new Set(currentProjects.map(p => p.id));
-  return allTasks.filter(t => projectIds.has(t.project_id));
-};
+
 
 export function Dashboard() {
   const navigate = useNavigate();
@@ -93,14 +90,14 @@ export function Dashboard() {
     try {
       const [projectsRes, tasksRes, membersRes] = await Promise.all([
         getProjects(orgId),
-        getTasks(),
+        getTasks(orgId),
         getOrganizationMembers(orgId).catch(() => ({ data: [] }))
       ]);
       
       if (currentRequestId !== loadRequestId.current) return;
       
       setProjects(projectsRes.data);
-      setTasks(filterTasksByProjectIds(tasksRes.data, projectsRes.data));
+      setTasks(tasksRes.data);
       setMembers(membersRes.data || []);
     } catch (err) {
       if (currentRequestId !== loadRequestId.current) return;
@@ -227,8 +224,8 @@ export function Dashboard() {
       setNewTaskPriority('MEDIUM');
       setNewTaskAssignedUserId('');
       
-      const tasksRes = await getTasks();
-      setTasks(filterTasksByProjectIds(tasksRes.data, projects));
+      const tasksRes = await getTasks(activeOrganizationId || undefined);
+      setTasks(tasksRes.data);
       setModalState('none');
     } catch (err) {
       if (err instanceof Error) {
@@ -253,8 +250,8 @@ export function Dashboard() {
         status: task.status,
         ...updates
       });
-      const tasksRes = await getTasks();
-      setTasks(filterTasksByProjectIds(tasksRes.data, projects));
+      const tasksRes = await getTasks(activeOrganizationId || undefined);
+      setTasks(tasksRes.data);
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -289,10 +286,10 @@ export function Dashboard() {
       
       const [projectsRes, tasksRes] = await Promise.all([
         activeOrganizationId ? getProjects(activeOrganizationId) : Promise.resolve({ data: [], total: 0, skip: 0, limit: 0 }), 
-        getTasks()
+        activeOrganizationId ? getTasks(activeOrganizationId) : Promise.resolve({ data: [], total: 0, skip: 0, limit: 0 })
       ]);
       setProjects(projectsRes.data);
-      setTasks(filterTasksByProjectIds(tasksRes.data, projectsRes.data));
+      setTasks(tasksRes.data);
       
       setPendingDelete(null);
     } catch (err) {

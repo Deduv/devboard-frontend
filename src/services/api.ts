@@ -218,9 +218,14 @@ export async function getProjects(organizationId?: number): Promise<ProjectListR
   return response.json();
 }
 
-export async function getTasks(): Promise<TaskListResponse> {
+export async function getTasks(organizationId?: number): Promise<TaskListResponse> {
   const token = getToken();
-  const response = await fetch(`${API_BASE_URL}/api/v1/tasks/`, {
+  let url = `${API_BASE_URL}/api/v1/tasks/`;
+  if (organizationId !== undefined) {
+    url += `?organization_id=${organizationId}`;
+  }
+  
+  const response = await fetch(url, {
     headers: {
       'Authorization': `Bearer ${token}`,
     },
