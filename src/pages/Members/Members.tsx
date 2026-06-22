@@ -90,8 +90,8 @@ export function Members() {
           <div className={styles.grid}>
             {members.map(member => (
               <div key={member.id} className={styles.memberCard}>
-                <div className={styles.memberName}>User ID: {member.user_id}</div>
-                <div className={styles.memberEmail}>Joined: {new Date(member.joined_at).toLocaleDateString()}</div>
+                <div className={styles.memberName}>{member.name || member.email || `User ID: ${member.user_id}`}</div>
+                <div className={styles.memberEmail}>{member.email || 'No email provided'} &bull; Joined: {new Date(member.joined_at).toLocaleDateString()}</div>
                 <div className={`${styles.memberRole} ${styles[`role${member.role}`] || ''}`}>
                   {member.role}
                 </div>

@@ -101,7 +101,7 @@ export function Dashboard() {
       setMembers(membersRes.data || []);
     } catch (err) {
       if (currentRequestId !== loadRequestId.current) return;
-      setError('Não foi possível carregar os dados do workspace.');
+      setError('Failed to load workspace data.');
       if (err instanceof Error && err.message.includes('401')) {
         handleLogout();
       }
@@ -181,7 +181,7 @@ export function Dashboard() {
   const handleCreateProject = async (e: FormEvent) => {
     e.preventDefault();
     if (!activeOrganizationId) {
-      setCreateProjectError('Nenhum workspace ativo. Selecione ou crie um workspace.');
+      setCreateProjectError('No active workspace. Select or create a workspace.');
       return;
     }
     setIsCreatingProject(true);
@@ -197,7 +197,7 @@ export function Dashboard() {
       if (err instanceof Error) {
         setCreateProjectError(err.message);
       } else {
-        setCreateProjectError('Erro inesperado ao criar o projeto.');
+        setCreateProjectError('Failed to create project.');
       }
     } finally {
       setIsCreatingProject(false);
@@ -207,7 +207,7 @@ export function Dashboard() {
   const handleCreateTask = async (e: FormEvent) => {
     e.preventDefault();
     if (newTaskProjectId === '') {
-      setCreateTaskError('Por favor, selecione um projeto válido.');
+      setCreateTaskError('Please select a valid project.');
       return;
     }
 
@@ -229,7 +229,7 @@ export function Dashboard() {
       if (err instanceof Error) {
         setCreateTaskError(err.message);
       } else {
-        setCreateTaskError('Erro inesperado ao criar a tarefa.');
+        setCreateTaskError('Failed to create task.');
       }
     } finally {
       setIsCreatingTask(false);
@@ -253,7 +253,7 @@ export function Dashboard() {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Erro ao atualizar a tarefa.');
+        setError('Failed to update task.');
       }
     } finally {
       setUpdatingTaskId(null);
@@ -288,7 +288,7 @@ export function Dashboard() {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Erro ao deletar.');
+        setError('Failed to delete.');
       }
     } finally {
       setIsDeleting(false);
@@ -365,11 +365,11 @@ export function Dashboard() {
               ))}
             </select>
           ) : (
-            <span className={styles.noWorkspaceMsg}>Nenhum workspace</span>
+            <span className={styles.noWorkspaceMsg}>No workspace</span>
           )}
           <Button variant="primary" onClick={() => {
             if (!activeOrganizationId) {
-              setError("Você precisa de um workspace para criar projetos.");
+              setError("You need a workspace to create projects.");
               return;
             }
             setModalState('select');
@@ -393,7 +393,7 @@ export function Dashboard() {
            <div className={styles.errorBanner}>{error}</div>
         ) : loading ? (
            <div className={styles.loadingState}>
-              <p>Carregando seus dados...</p>
+              <div className={styles.loadingText}>Loading workspace data...</div>
            </div>
         ) : (
           <div className={styles.contentWrapper}>
@@ -459,7 +459,7 @@ export function Dashboard() {
                   </div>
                 </div>
                 {sortedProjects.length === 0 ? (
-                  <p className={styles.emptyText}>Nenhum projeto encontrado.</p>
+                  <div className={styles.emptyText}>No projects found.</div>
                 ) : (
                   <ul className={styles.list}>
                     {sortedProjects.map((p) => (
@@ -547,7 +547,7 @@ export function Dashboard() {
                   </div>
                 </div>
                 {sortedTasks.length === 0 ? (
-                  <p className={styles.emptyText}>Nenhuma tarefa encontrada.</p>
+                  <div className={styles.emptyText}>No tasks found.</div>
                 ) : (
                   <ul className={styles.list}>
                     {sortedTasks.map((t) => {

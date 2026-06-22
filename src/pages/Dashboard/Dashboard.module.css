@@ -258,7 +258,14 @@
 }
 
 .emptyText {
-  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 120px;
+  margin: var(--space-4) 0;
+  background-color: var(--color-background);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
   font-size: 14px;
   color: var(--color-text-secondary);
 }
