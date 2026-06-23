@@ -8,20 +8,72 @@
 
 .header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: var(--space-4) var(--space-6);
+  align-items: center;
+  padding: 0 var(--space-6);
+  height: 64px;
   background-color: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.logoIcon {
+  color: var(--color-accent);
+  width: 24px;
+  height: 24px;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  gap: var(--space-1);
+}
+
+.navLink {
+  background: none;
+  border: none;
+  height: 64px;
+  padding: 0 var(--space-3);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  position: relative;
+  transition: color var(--transition-fast);
+  display: flex;
+  align-items: center;
+}
+
+.navLink:hover {
+  color: var(--color-text-primary);
+}
+
+.activeNavLink {
+  color: var(--color-text-primary);
+}
+
+.activeNavLink::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--color-accent);
 }
 
 .title {
   margin: 0;
   font-size: 20px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: -0.5px;
 }
 
 .headerActions {
@@ -33,17 +85,17 @@
 .main {
   flex: 1;
   padding: var(--space-6);
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
   width: 100%;
 }
 
 .formContainer {
   background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
   margin-bottom: var(--space-6);
+  box-shadow: var(--shadow-sm);
 }
 
 .form {
@@ -60,66 +112,91 @@
 }
 
 .inputGroup label {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
+  color: var(--color-text-secondary);
 }
 
 .input, .select {
-  padding: 8px 12px;
+  padding: 0 16px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   background-color: var(--color-background);
   color: var(--color-text-primary);
-  height: 38px;
+  height: 44px;
+  font-size: 14px;
+  transition: all var(--transition-fast);
 }
 
-.loadingState, .emptyState, .errorState {
+.input:focus, .select:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+  outline: none;
+}
+
+.loadingState, .emptyState {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 200px;
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  min-height: 200px;
+  padding: var(--space-6);
   color: var(--color-text-secondary);
-  font-size: 14px;
+  font-size: 15px;
+  text-align: center;
 }
 
 .errorState {
+  background-color: rgba(215, 0, 21, 0.1);
   color: var(--color-danger);
+  padding: var(--space-4);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(215, 0, 21, 0.2);
+  margin-bottom: var(--space-4);
+  text-align: center;
+  font-size: 14px;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: var(--space-4);
 }
 
 .inviteCard {
-  padding: var(--space-4);
   background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-1);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.inviteCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .inviteEmail {
   font-weight: 600;
-  font-size: 16px;
+  font-size: 18px;
+  color: var(--color-text-primary);
+  letter-spacing: -0.3px;
+  margin-bottom: 2px;
 }
 
 .inviteMeta {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--color-text-secondary);
+  margin-bottom: var(--space-3);
 }
 
 .badgeRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: var(--space-2);
+  margin-top: auto;
 }
 
 .badges {
@@ -128,25 +205,50 @@
 }
 
 .badge {
-  padding: 4px 8px;
-  border-radius: var(--radius-sm);
-  font-size: 12px;
-  font-weight: bold;
-  background-color: var(--color-accent);
-  color: white;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.badgeOWNER { background-color: #6c5ce7; }
-.badgeADMIN { background-color: #00b894; }
-.badgeMEMBER { background-color: #0984e3; }
+.badgeOWNER {
+  background-color: var(--color-surface-secondary);
+  color: var(--color-accent);
+}
+.badgeADMIN {
+  background-color: var(--color-surface-secondary);
+  color: var(--color-text-primary);
+}
+.badgeMEMBER {
+  background-color: var(--color-surface-secondary);
+  color: var(--color-text-secondary);
+}
 
-.statusPENDING { background-color: #f39c12; }
-.statusACCEPTED { background-color: #2ecc71; }
-.statusEXPIRED { background-color: #95a5a6; }
-.statusREVOKED { background-color: #e74c3c; }
+.statusPENDING {
+  background-color: rgba(210, 161, 44, 0.1);
+  color: var(--color-warning);
+}
+.statusACCEPTED {
+  background-color: rgba(46, 204, 113, 0.1);
+  color: var(--color-success);
+}
+.statusEXPIRED {
+  background-color: var(--color-surface-secondary);
+  color: var(--color-text-secondary);
+}
+.statusREVOKED {
+  background-color: rgba(231, 76, 60, 0.1);
+  color: var(--color-danger);
+}
 
 .formError {
+  background-color: rgba(215, 0, 21, 0.1);
   color: var(--color-danger);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(215, 0, 21, 0.2);
+  margin-top: var(--space-4);
   font-size: 14px;
-  margin-top: var(--space-3);
 }

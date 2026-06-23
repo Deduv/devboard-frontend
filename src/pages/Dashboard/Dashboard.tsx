@@ -1,6 +1,5 @@
 import { useEffect, useState, FormEvent, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ThemeToggle } from '../../components/ThemeToggle/ThemeToggle';
 import { Card } from '../../components/Card/Card';
 import { Button } from '../../components/Button/Button';
 import { Input } from '../../components/Input/Input';
@@ -13,6 +12,7 @@ import { Task, TaskStatus } from '../../types/task';
 import { Organization } from '../../types/organization';
 import { OrganizationMember } from '../../types/member';
 import styles from './Dashboard.module.css';
+import { AppLayout } from '../../components/AppLayout/AppLayout';
 
 type ModalState = 'none' | 'select' | 'project' | 'task';
 type ActiveView = 'projects' | 'tasks';
@@ -66,7 +66,7 @@ export function Dashboard() {
   const [createTaskError, setCreateTaskError] = useState<string | null>(null);
 
   const [updatingTaskId, setUpdatingTaskId] = useState<number | null>(null);
-  
+
   // Delete States
   const [pendingDelete, setPendingDelete] = useState<PendingDelete>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -80,7 +80,7 @@ export function Dashboard() {
 
   const loadProjectsAndTasksForWorkspace = useCallback(async (orgId: number | null) => {
     const currentRequestId = ++loadRequestId.current;
-    
+
     if (!orgId) {
       setProjects([]);
       setTasks([]);
@@ -93,9 +93,9 @@ export function Dashboard() {
         getTasks(orgId),
         getOrganizationMembers(orgId).catch(() => ({ data: [] }))
       ]);
-      
+
       if (currentRequestId !== loadRequestId.current) return;
-      
+
       setProjects(projectsRes.data);
       setTasks(tasksRes.data);
       setMembers(membersRes.data || []);
@@ -222,7 +222,7 @@ export function Dashboard() {
       setNewTaskProjectId('');
       setNewTaskPriority('MEDIUM');
       setNewTaskAssignedUserId('');
-      
+
       await loadProjectsAndTasksForWorkspace(activeOrganizationId);
       setModalState('none');
     } catch (err) {
@@ -280,9 +280,9 @@ export function Dashboard() {
       } else {
         await deleteTask(pendingDelete.id);
       }
-      
+
       await loadProjectsAndTasksForWorkspace(activeOrganizationId);
-      
+
       setPendingDelete(null);
     } catch (err) {
       if (err instanceof Error) {
@@ -317,7 +317,7 @@ export function Dashboard() {
     }
   });
 
-  const filteredTasksByProject = selectedProjectId 
+  const filteredTasksByProject = selectedProjectId
     ? tasks.filter(t => t.project_id === selectedProjectId)
     : tasks;
 
@@ -331,64 +331,45 @@ export function Dashboard() {
   const sortedTasks = [...filteredTasks].sort((a, b) => {
     const priorityA = PRIORITY_WEIGHT[a.priority] || 0;
     const priorityB = PRIORITY_WEIGHT[b.priority] || 0;
-    
+
     if (taskSort === 'critical_first') return priorityB - priorityA;
     if (taskSort === 'least_critical_first') return priorityA - priorityB;
-    
+
     return 0;
   });
 
   return (
-    <div className={styles.container}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>
-          <button 
-            className={styles.titleButton}
-            onClick={() => { setActiveView('projects'); setSelectedProjectId(null); }}
-            aria-label="Return to main dashboard"
+    <AppLayout
+      activePage="dashboard"
+      onDashboardClick={() => { setActiveView('projects'); setSelectedProjectId(null); }}
+      onNewClick={() => {
+        if (!activeOrganizationId) {
+          setError("You need a workspace to create projects.");
+          return;
+        }
+        setModalState('select');
+      }}
+      workspaceSelector={
+        organizations.length > 0 ? (
+          <select
+            className={styles.workspaceSelector}
+            value={activeOrganizationId || ''}
+            onChange={(e) => handleOrganizationChange(Number(e.target.value))}
+            aria-label="Select workspace"
           >
-            Dashboard
-          </button>
-        </h1>
-        <div className={styles.headerActions}>
-          {organizations.length > 0 ? (
-            <select
-              className={styles.workspaceSelector}
-              value={activeOrganizationId || ''}
-              onChange={(e) => handleOrganizationChange(Number(e.target.value))}
-              aria-label="Select workspace"
-            >
-              {organizations.map(org => (
-                <option key={org.id} value={org.id}>
-                  {org.name}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <span className={styles.noWorkspaceMsg}>No workspace</span>
-          )}
-          <Button variant="primary" onClick={() => {
-            if (!activeOrganizationId) {
-              setError("You need a workspace to create projects.");
-              return;
-            }
-            setModalState('select');
-          }}>+ New</Button>
-          <Button variant="secondary" onClick={() => navigate('/members')}>
-            Members
-          </Button>
-          <Button variant="secondary" onClick={() => navigate('/invitations')}>
-            Invitations
-          </Button>
-          <Button variant="secondary" onClick={() => navigate('/admin/users')}>
-            Admin
-          </Button>
-          <ThemeToggle />
-          <Button variant="secondary" onClick={handleLogout}>Logout</Button>
-        </div>
-      </header>
+            {organizations.map(org => (
+              <option key={org.id} value={org.id}>
+                {org.name}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <span className={styles.noWorkspaceMsg}>No workspace</span>
+        )
+      }
+    >
 
-      <main className={styles.main}>
+      <div className={styles.main}>
         {error ? (
            <div className={styles.errorBanner}>{error}</div>
         ) : loading ? (
@@ -423,13 +404,13 @@ export function Dashboard() {
             )}
             <div className={styles.viewControls}>
               <div className={styles.tabs}>
-                <button 
+                <button
                   className={`${styles.tab} ${activeView === 'projects' ? styles.activeTab : ''}`}
                   onClick={() => { setActiveView('projects'); setSelectedProjectId(null); }}
                 >
                   Projects
                 </button>
-                <button 
+                <button
                   className={`${styles.tab} ${activeView === 'tasks' ? styles.activeTab : ''}`}
                   onClick={() => setActiveView('tasks')}
                 >
@@ -448,8 +429,8 @@ export function Dashboard() {
                   </div>
                   <div className={styles.sortControl}>
                     <span className={styles.sortLabel}>Sort:</span>
-                    <select 
-                      className={styles.sortSelect} 
+                    <select
+                      className={styles.sortSelect}
                       value={projectSort}
                       onChange={(e) => setProjectSort(e.target.value as ProjectSort)}
                     >
@@ -463,8 +444,8 @@ export function Dashboard() {
                 ) : (
                   <ul className={styles.list}>
                     {sortedProjects.map((p) => (
-                      <li 
-                        key={p.id} 
+                      <li
+                        key={p.id}
                         className={`${styles.listItem} ${styles.clickableItem}`}
                         onClick={() => {
                           setSelectedProjectId(p.id);
@@ -476,8 +457,8 @@ export function Dashboard() {
                             <div className={styles.itemTitle}>{p.name}</div>
                             {p.description && <div className={styles.itemSubtitle}>{p.description}</div>}
                           </div>
-                          
-                          <button 
+
+                          <button
                             className={styles.deleteButton}
                             onClick={(e) => handleDeleteClick(e, 'project', p.id)}
                             aria-label="Delete project"
@@ -498,7 +479,7 @@ export function Dashboard() {
                 <div className={styles.cardHeaderRow}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     {selectedProjectId && (
-                      <button 
+                      <button
                         className={styles.backButton}
                         onClick={() => {
                           setSelectedProjectId(null);
@@ -509,18 +490,18 @@ export function Dashboard() {
                       </button>
                     )}
                     <h2 className={styles.cardHeader}>
-                      {selectedProjectId 
+                      {selectedProjectId
                         ? projects.find(p => p.id === selectedProjectId)?.name || 'Unknown'
                         : 'All Tasks'}
                     </h2>
                     <span className={styles.badge}>{sortedTasks.length}</span>
                   </div>
-                  
+
                   <div className={styles.controlsGroup}>
                     <div className={styles.sortControl}>
                       <span className={styles.sortLabel}>Sort:</span>
-                      <select 
-                        className={styles.sortSelect} 
+                      <select
+                        className={styles.sortSelect}
                         value={taskSort}
                         onChange={(e) => setTaskSort(e.target.value as TaskSort)}
                       >
@@ -532,8 +513,8 @@ export function Dashboard() {
                     {showStatusFilter && (
                       <div className={styles.sortControl}>
                         <span className={styles.sortLabel}>Filter by Status:</span>
-                        <select 
-                          className={styles.sortSelect} 
+                        <select
+                          className={styles.sortSelect}
                           value={taskStatusFilter}
                           onChange={(e) => setTaskStatusFilter(e.target.value as TaskStatusFilter)}
                         >
@@ -553,7 +534,7 @@ export function Dashboard() {
                     {sortedTasks.map((t) => {
                       const projectForTask = projects.find(p => p.id === t.project_id);
                       const projectName = projectForTask ? projectForTask.name : 'Unknown';
-                      
+
                       let assignedToText = 'Unassigned';
                       if (t.assigned_user_id !== null) {
                         const member = members.find(m => m.user_id === t.assigned_user_id);
@@ -584,7 +565,7 @@ export function Dashboard() {
                                 Project: {projectName} &bull; Assigned to: {assignedToText}
                               </div>
                             </div>
-                            
+
                             <div className={styles.taskActions}>
                               <select
                                 className={styles.statusSelect}
@@ -598,7 +579,7 @@ export function Dashboard() {
                                   <option key={m.user_id} value={m.user_id}>{m.name || m.email || `User ID: ${m.user_id}`}</option>
                                 ))}
                               </select>
-                              <select 
+                              <select
                                 className={styles.statusSelect}
                                 value={t.status}
                                 disabled={updatingTaskId === t.id}
@@ -609,7 +590,7 @@ export function Dashboard() {
                                 <option value="DOING">DOING</option>
                                 <option value="DONE">DONE</option>
                               </select>
-                              <button 
+                              <button
                                 className={styles.deleteButton}
                                 onClick={(e) => handleDeleteClick(e, 'task', t.id)}
                                 aria-label="Delete task"
@@ -627,13 +608,13 @@ export function Dashboard() {
             )}
           </div>
         )}
-      </main>
+      </div>
 
-      <ConfirmDialog 
+      <ConfirmDialog
         isOpen={pendingDelete !== null}
         title={pendingDelete?.type === 'project' ? 'Delete project' : 'Delete task'}
         message={
-          pendingDelete?.type === 'project' 
+          pendingDelete?.type === 'project'
             ? 'Are you sure you want to delete this project? All tasks linked to it will also be deleted.'
             : 'Are you sure you want to delete this task?'
         }
@@ -651,8 +632,8 @@ export function Dashboard() {
             <div className={styles.modalHeader}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 {(modalState === 'project' || modalState === 'task') && (
-                  <button 
-                    className={styles.modalBack} 
+                  <button
+                    className={styles.modalBack}
                     onClick={() => setModalState('select')}
                     aria-label="Back"
                   >
@@ -682,16 +663,16 @@ export function Dashboard() {
             {modalState === 'project' && (
               <form onSubmit={handleCreateProject} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {createProjectError && <div className={styles.errorBanner}>{createProjectError}</div>}
-                <Input 
-                  label="Name" 
-                  placeholder="Project name" 
+                <Input
+                  label="Name"
+                  placeholder="Project name"
                   value={newProjectName}
                   onChange={(e) => setNewProjectName(e.target.value)}
                   required
                 />
-                <Input 
-                  label="Description" 
-                  placeholder="Short description (optional)" 
+                <Input
+                  label="Description"
+                  placeholder="Short description (optional)"
                   value={newProjectDesc}
                   onChange={(e) => setNewProjectDesc(e.target.value)}
                 />
@@ -704,25 +685,25 @@ export function Dashboard() {
             {modalState === 'task' && (
               <form onSubmit={handleCreateTask} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {createTaskError && <div className={styles.errorBanner}>{createTaskError}</div>}
-                <Input 
-                  label="Title" 
-                  placeholder="Task title" 
+                <Input
+                  label="Title"
+                  placeholder="Task title"
                   value={newTaskTitle}
                   onChange={(e) => setNewTaskTitle(e.target.value)}
                   required
                 />
-                <Input 
-                  label="Description" 
-                  placeholder="Task description (optional)" 
+                <Input
+                  label="Description"
+                  placeholder="Task description (optional)"
                   value={newTaskDesc}
                   onChange={(e) => setNewTaskDesc(e.target.value)}
                 />
-                
+
                 <div className={styles.fieldGroup}>
                   <label className={styles.label}>Project</label>
-                  <select 
-                    className={styles.select} 
-                    value={newTaskProjectId} 
+                  <select
+                    className={styles.select}
+                    value={newTaskProjectId}
                     onChange={(e) => setNewTaskProjectId(e.target.value === '' ? '' : Number(e.target.value))}
                     required
                   >
@@ -735,9 +716,9 @@ export function Dashboard() {
 
                 <div className={styles.fieldGroup}>
                   <label className={styles.label}>Priority</label>
-                  <select 
-                    className={styles.select} 
-                    value={newTaskPriority} 
+                  <select
+                    className={styles.select}
+                    value={newTaskPriority}
                     onChange={(e) => setNewTaskPriority(e.target.value)}
                     required
                   >
@@ -750,9 +731,9 @@ export function Dashboard() {
 
                 <div className={styles.fieldGroup}>
                   <label className={styles.label}>Assignee</label>
-                  <select 
-                    className={styles.select} 
-                    value={newTaskAssignedUserId} 
+                  <select
+                    className={styles.select}
+                    value={newTaskAssignedUserId}
                     onChange={(e) => setNewTaskAssignedUserId(e.target.value === '' ? '' : Number(e.target.value))}
                   >
                     <option value="">Unassigned</option>
@@ -770,6 +751,7 @@ export function Dashboard() {
           </div>
         </div>
       )}
-    </div>
-  );
+
+  </AppLayout>
+);
 }

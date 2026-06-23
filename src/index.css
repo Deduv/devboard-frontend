@@ -1,15 +1,48 @@
-/* Design Tokens */
+/* Design Tokens - Mutum Foundation */
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+
 :root {
-  /* Colors - Light Theme */
-  --color-background: #fbfbfd;
-  --color-surface: #ffffff;
-  --color-border: #d2d2d7;
-  --color-text-primary: #1d1d1f;
-  --color-text-secondary: #86868b;
-  --color-accent: #0066cc;
-  --color-accent-hover: #004499;
-  --color-danger: #ff3b30;
-  --color-danger-hover: #d92b22;
+  /* Color Palette - Light Theme (Warm off-white) */
+  --color-background: #F6F2E9;
+  --color-surface: #FFFCF6;
+  --color-surface-secondary: #F0EBE1;
+  --color-border: #E0DACE;
+
+  --color-text-primary: #0D1B2A;
+  --color-text-secondary: #4A5568;
+
+  /* Brand Accent - Burned Gold */
+  --color-accent: #D2A12C;
+  --color-accent-hover: #B98918;
+
+  /* Semantic Colors */
+  --color-success: #2ecc71;
+  --color-warning: #f39c12;
+  --color-danger: #e74c3c;
+  --color-danger-hover: #c0392b;
+
+  /* Focus Ring */
+  --color-focus-ring: rgba(210, 161, 44, 0.4);
+
+  /* Typography Scales */
+  --font-family: 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 28px;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.2;
+  --line-height-base: 1.5;
+  --line-height-relaxed: 1.75;
 
   /* Spacing Scale */
   --space-1: 4px;
@@ -19,43 +52,83 @@
   --space-5: 32px;
   --space-6: 48px;
 
-  /* Border Radius */
+  /* Border Radius Scale */
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.08);
+  /* Shadow Scale */
+  --shadow-sm: 0 2px 4px rgba(13, 27, 42, 0.04);
+  --shadow-md: 0 4px 14px rgba(13, 27, 42, 0.08);
+  --shadow-lg: 0 10px 24px rgba(13, 27, 42, 0.12);
 
-  /* Fonts */
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  /* Transition Scale */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.2s ease;
+  --transition-slow: 0.3s ease;
 }
 
 [data-theme='dark'] {
-  /* Colors - Dark Theme */
-  --color-background: #000000;
-  --color-surface: #1c1c1e;
-  --color-border: #38383a;
-  --color-text-primary: #f5f5f7;
-  --color-text-secondary: #86868b;
-  --color-accent: #2997ff;
-  --color-accent-hover: #40a5ff;
+  /* Color Palette - Dark Theme (Deep Blue-Black) */
+  --color-background: #0B0C10;
+  --color-surface: #12141A;
+  --color-surface-secondary: #1C1E26;
+  --color-border: #2A2D37;
+
+  --color-text-primary: #F6F2E9;
+  --color-text-secondary: #A0AEC0;
+
+  /* Brand Accent */
+  --color-accent: #D2A12C;
+  --color-accent-hover: #E2B13C;
+
+  /* Semantic Colors */
+  --color-success: #2ecc71;
+  --color-warning: #f39c12;
   --color-danger: #ff453a;
   --color-danger-hover: #ff5c53;
 
+  /* Focus Ring */
+  --color-focus-ring: rgba(210, 161, 44, 0.6);
+
+  /* Shadows for Dark Mode */
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 10px 24px rgba(0, 0, 0, 0.8);
 }
 
+/* Global Styles */
 body {
   margin: 0;
   padding: 0;
-  background-color: var(--color-background);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
   color: var(--color-text-primary);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  background-color: var(--color-background);
+  transition: background-color var(--transition-slow), color var(--transition-slow);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
   box-sizing: border-box;
 }
+
+::selection {
+  background-color: var(--color-accent);
+  color: #ffffff;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.logoLight { display: block; width: 100%; height: 100%; object-fit: contain; }
+.logoDark { display: none; width: 100%; height: 100%; object-fit: contain; }
+
+[data-theme='dark'] .logoLight { display: none; }
+[data-theme='dark'] .logoDark { display: block; }

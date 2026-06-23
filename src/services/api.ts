@@ -173,7 +173,11 @@ export async function getPendingUsers(): Promise<UserListResponse> {
     throw new Error(`Falha ao buscar usuários pendentes. (Status: ${response.status})`);
   }
 
-  return response.json();
+  const data = await response.json();
+  if (Array.isArray(data)) {
+    return { data, total: data.length, skip: 0, limit: data.length };
+  }
+  return data;
 }
 
 export async function approveUser(userId: number): Promise<User> {

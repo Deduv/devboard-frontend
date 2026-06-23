@@ -5,9 +5,9 @@ import { getActiveOrganizationId } from '../../services/workspaceStorage';
 import { OrganizationInvite } from '../../types/invite';
 import { OrganizationRole } from '../../types/member';
 import { Button } from '../../components/Button/Button';
-import { ThemeToggle } from '../../components/ThemeToggle/ThemeToggle';
 import { clearToken } from '../../services/authStorage';
 import styles from './Invitations.module.css';
+import { AppLayout } from '../../components/AppLayout/AppLayout';
 
 export function Invitations() {
   const navigate = useNavigate();
@@ -118,24 +118,9 @@ export function Invitations() {
   };
 
   return (
-    <div className={styles.container}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>
-          <Button variant="secondary" onClick={() => navigate('/dashboard')}>
-            Back to Dashboard
-          </Button>
-          <Button variant="secondary" onClick={() => navigate('/members')}>
-            Members
-          </Button>
-          Invitations
-        </h1>
-        <div className={styles.headerActions}>
-          <ThemeToggle />
-          <Button variant="secondary" onClick={handleLogout}>Logout</Button>
-        </div>
-      </header>
+    <AppLayout activePage="invitations">
 
-      <main className={styles.main}>
+      <div className={styles.main}>
         {!activeOrganizationId ? (
           <div className={styles.emptyState}>No active organization selected.</div>
         ) : error ? (
@@ -215,7 +200,7 @@ export function Invitations() {
             )}
           </>
         )}
-      </main>
-    </div>
+      </div>
+    </AppLayout>
   );
 }

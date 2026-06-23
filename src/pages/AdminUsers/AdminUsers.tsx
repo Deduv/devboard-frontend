@@ -3,10 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { getPendingUsers, approveUser } from '../../services/api';
 import { User } from '../../types/user';
 import { Button } from '../../components/Button/Button';
-import { ThemeToggle } from '../../components/ThemeToggle/ThemeToggle';
 import { clearToken } from '../../services/authStorage';
 import styles from './AdminUsers.module.css';
-
+import { AppLayout } from '../../components/AppLayout/AppLayout';
 export function AdminUsers() {
   const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
@@ -35,13 +34,19 @@ export function AdminUsers() {
       }
     } catch (err) {
       if (requestId === listRequestIdRef.current) {
-        if (err instanceof Error && err.message.includes('AdminAccessError: 403')) {
-          setError('You do not have permission to access this page.');
+        if (err instanceof Error) {
+          if (err.message.includes('401')) {
+            setError('Sessão expirada. Faça login novamente.');
+            handleLogout();
+          } else if (err.message.includes('403')) {
+            setError('Você não tem permissão ou ainda não foi aprovado.');
+          } else if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+            setError('Backend indisponível. Verifique sua conexão.');
+          } else {
+            setError('Não foi possível carregar os usuários pendentes.');
+          }
         } else {
-          setError('Unable to load pending users.');
-        }
-        if (err instanceof Error && err.message.includes('401')) {
-          handleLogout();
+          setError('Não foi possível carregar os usuários pendentes.');
         }
       }
     } finally {
@@ -82,28 +87,20 @@ export function AdminUsers() {
   };
 
   return (
-    <div className={styles.container}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>
-          <Button variant="secondary" onClick={() => navigate('/dashboard')}>
-            Back to Dashboard
-          </Button>
-          Admin Users
-        </h1>
-        <div className={styles.headerActions}>
-          <ThemeToggle />
-          <Button variant="secondary" onClick={handleLogout}>Logout</Button>
-        </div>
-      </header>
+    <AppLayout activePage="admin">
 
-      <main className={styles.main}>
+      <div className={styles.main}>
         {success && <div className={styles.successMessage}>{success}</div>}
         {error ? (
           <div className={styles.errorState}>{error}</div>
         ) : loading ? (
           <div className={styles.loadingState}>Loading pending users...</div>
         ) : users.length === 0 ? (
-          <div className={styles.emptyState}>No pending users.</div>
+          <div className={styles.emptyState}>
+            <div className={styles.emptyStateIcon}>✓</div>
+            <h3>All Caught Up!</h3>
+            <p>No pending users waiting for approval.</p>
+          </div>
         ) : (
           <div className={styles.grid}>
             {users.map(user => (
@@ -129,7 +126,7 @@ export function AdminUsers() {
             ))}
           </div>
         )}
-      </main>
-    </div>
+      </div>
+    </AppLayout>
   );
 }

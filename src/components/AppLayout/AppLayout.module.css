@@ -1,0 +1,21 @@
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--color-background);
+}
+
+.mainContent {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  height: 100vh;
+  position: relative;
+}
+
+.topBar {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-6);
+  z-index: 50;
+}

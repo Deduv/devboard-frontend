@@ -1,0 +1,225 @@
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  height: 100vh;
+  background-color: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4) var(--space-3);
+  position: sticky;
+  top: 0;
+  left: 0;
+  overflow-y: auto;
+  transition: width var(--transition-base), min-width var(--transition-base), padding var(--transition-base);
+}
+
+.sidebar.collapsed {
+  width: 80px;
+  min-width: 80px;
+  padding: var(--space-4) var(--space-2);
+  align-items: center;
+}
+
+.collapseToggle {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: -14px;
+  width: 28px;
+  height: 28px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  transition: var(--transition-fast);
+  z-index: 10;
+  box-shadow: var(--shadow-sm);
+}
+
+.collapseToggle:hover {
+  background-color: var(--color-surface-secondary);
+  border-color: var(--color-text-primary);
+}
+
+.brandArea {
+  margin-bottom: var(--space-5);
+  padding: 0 var(--space-2);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.sidebar.collapsed .brandArea {
+  align-items: center;
+  padding: 0;
+}
+
+.brandName {
+  margin: 0 0 var(--space-1) 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: -0.5px;
+}
+
+.tagline {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.workspacesSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.sidebar.collapsed .workspacesSection {
+  align-items: center;
+}
+
+.sectionLabel {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 var(--space-2) 0;
+  padding: 0 var(--space-2);
+}
+
+.workspaceArea {
+  padding: 0 var(--space-2);
+  width: 100%;
+}
+
+.newActionArea {
+  padding: 0 var(--space-2);
+  width: 100%;
+}
+
+.sidebar.collapsed .newActionArea {
+  padding: 0;
+}
+
+.newButton {
+  width: 100%;
+  justify-content: center;
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+.sidebar.collapsed .newButton {
+  padding: var(--space-2);
+  min-width: 40px;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--space-5);
+  width: 100%;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  background: none;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  text-align: left;
+  transition: var(--transition-fast);
+  width: 100%;
+}
+
+.sidebar.collapsed .navItem {
+  justify-content: center;
+  padding: var(--space-2);
+}
+
+.navItem:hover {
+  background-color: var(--color-surface-secondary);
+  color: var(--color-text-primary);
+}
+
+.navItem.active {
+  background-color: var(--color-surface-secondary);
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.label {
+  margin-left: var(--space-3);
+  white-space: nowrap;
+}
+
+.footer {
+  margin-top: auto;
+  padding: var(--space-4) var(--space-2) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  width: 100%;
+}
+
+.sidebar.collapsed .footer {
+  padding: var(--space-4) 0 0;
+  align-items: center;
+}
+
+.footerRow {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  padding: var(--space-2) var(--space-1);
+  transition: var(--transition-fast);
+  width: 100%;
+}
+
+.sidebar.collapsed .logoutButton {
+  justify-content: center;
+  padding: var(--space-2);
+}
+
+.logoutButton:hover {
+  color: var(--color-danger);
+}

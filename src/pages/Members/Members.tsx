@@ -3,10 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { getOrganizationMembers } from '../../services/api';
 import { getActiveOrganizationId } from '../../services/workspaceStorage';
 import { OrganizationMember } from '../../types/member';
-import { Button } from '../../components/Button/Button';
-import { ThemeToggle } from '../../components/ThemeToggle/ThemeToggle';
 import { clearToken } from '../../services/authStorage';
 import styles from './Members.module.css';
+import { AppLayout } from '../../components/AppLayout/AppLayout';
 
 export function Members() {
   const navigate = useNavigate();
@@ -63,21 +62,9 @@ export function Members() {
   }, [activeOrganizationId, handleLogout]);
 
   return (
-    <div className={styles.container}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>
-          Members
-        </h1>
-        <div className={styles.headerActions}>
-          <Button variant="secondary" onClick={() => navigate('/dashboard')}>
-            Back to Dashboard
-          </Button>
-          <ThemeToggle />
-          <Button variant="secondary" onClick={handleLogout}>Logout</Button>
-        </div>
-      </header>
+    <AppLayout activePage="members">
 
-      <main className={styles.main}>
+      <div className={styles.main}>
         {!activeOrganizationId ? (
           <div className={styles.emptyState}>No active organization selected.</div>
         ) : error ? (
@@ -99,7 +86,7 @@ export function Members() {
             ))}
           </div>
         )}
-      </main>
-    </div>
+      </div>
+    </AppLayout>
   );
 }
