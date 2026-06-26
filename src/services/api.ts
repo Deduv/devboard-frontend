@@ -31,7 +31,7 @@ export async function login(email: string, password: string): Promise<LoginRespo
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => null);
-    throw new ApiError(errorData?.detail || 'Erro ao realizar login. Verifique suas credenciais.', response.status);
+    throw new ApiError(errorData?.detail || 'Failed to sign in. Please check your credentials.', response.status);
   }
 
   return response.json();
@@ -64,7 +64,7 @@ export async function getOrganizations(): Promise<OrganizationListResponse> {
   });
 
   if (!response.ok) {
-    throw new Error(`Falha ao buscar organizações. (Status: ${response.status})`);
+    throw new Error(`Failed to fetch organizations. (Status: ${response.status})`);
   }
 
   return response.json();
@@ -82,7 +82,7 @@ export async function getOrganizationMembers(organizationId: number): Promise<Or
     if (response.status === 403 || response.status === 404) {
       throw new Error(`WorkspaceAccessError: ${response.status}`);
     }
-    throw new Error(`Falha ao buscar membros da organização. (Status: ${response.status})`);
+    throw new Error(`Failed to fetch organization members. (Status: ${response.status})`);
   }
 
   const data = await response.json();
@@ -104,7 +104,7 @@ export async function getOrganizationInvites(organizationId: number): Promise<Or
     if (response.status === 403 || response.status === 404) {
       throw new Error(`WorkspaceAccessError: ${response.status}`);
     }
-    throw new Error(`Falha ao buscar convites da organização. (Status: ${response.status})`);
+    throw new Error(`Failed to fetch organization invites. (Status: ${response.status})`);
   }
 
   const data = await response.json();
@@ -132,7 +132,7 @@ export async function createOrganizationInvite(organizationId: number, email: st
     if (response.status === 404) {
       throw new Error(`WorkspaceAccessError: 404`);
     }
-    throw new Error(`Falha ao criar convite. (Status: ${response.status})`);
+    throw new Error(`Failed to create invite. (Status: ${response.status})`);
   }
 
   return response.json();
@@ -154,7 +154,7 @@ export async function revokeOrganizationInvite(organizationId: number, inviteId:
     if (response.status === 404) {
       throw new Error(`WorkspaceAccessError: 404`);
     }
-    throw new Error(`Falha ao revogar convite. (Status: ${response.status})`);
+    throw new Error(`Failed to revoke invite. (Status: ${response.status})`);
   }
 }
 
@@ -170,7 +170,7 @@ export async function getPendingUsers(): Promise<UserListResponse> {
     if (response.status === 403) {
       throw new Error(`AdminAccessError: 403`);
     }
-    throw new Error(`Falha ao buscar usuários pendentes. (Status: ${response.status})`);
+    throw new Error(`Failed to fetch pending users. (Status: ${response.status})`);
   }
 
   const data = await response.json();
@@ -196,7 +196,7 @@ export async function approveUser(userId: number): Promise<User> {
     if (response.status === 404) {
       throw new Error(`AdminAccessError: 404`);
     }
-    throw new Error(`Falha ao aprovar usuário. (Status: ${response.status})`);
+    throw new Error(`Failed to approve user. (Status: ${response.status})`);
   }
 
   return response.json();
@@ -216,7 +216,7 @@ export async function getProjects(organizationId?: number): Promise<ProjectListR
   });
 
   if (!response.ok) {
-    throw new Error(`Falha ao buscar os projetos. (Status: ${response.status})`);
+    throw new Error(`Failed to fetch projects. (Status: ${response.status})`);
   }
 
   return response.json();
@@ -236,7 +236,7 @@ export async function getTasks(organizationId?: number): Promise<TaskListRespons
   });
 
   if (!response.ok) {
-    throw new Error(`Falha ao buscar as tarefas. (Status: ${response.status})`);
+    throw new Error(`Failed to fetch tasks. (Status: ${response.status})`);
   }
 
   return response.json();
@@ -265,7 +265,7 @@ export async function createProject(name: string, description: string, organizat
   });
 
   if (!response.ok) {
-    throw new Error(`Falha ao criar o projeto. (Status: ${response.status})`);
+    throw new Error(`Failed to create project. (Status: ${response.status})`);
   }
 
   return response.json();
@@ -310,7 +310,7 @@ export async function createTask(
   });
 
   if (!response.ok) {
-    throw new Error(`Falha ao criar a tarefa. (Status: ${response.status})`);
+    throw new Error(`Failed to create task. (Status: ${response.status})`);
   }
 
   return response.json();
@@ -328,7 +328,7 @@ export async function updateTask(taskId: number, updates: Partial<Task>): Promis
   });
 
   if (!response.ok) {
-    throw new Error(`Falha ao atualizar a tarefa. (Status: ${response.status})`);
+    throw new Error(`Failed to update task. (Status: ${response.status})`);
   }
 
   return response.json();
@@ -344,7 +344,7 @@ export async function deleteProject(projectId: number): Promise<void> {
   });
 
   if (!response.ok) {
-    throw new Error(`Falha ao deletar o projeto. (Status: ${response.status})`);
+    throw new Error(`Failed to delete project. (Status: ${response.status})`);
   }
 }
 
@@ -358,6 +358,6 @@ export async function deleteTask(taskId: number): Promise<void> {
   });
 
   if (!response.ok) {
-    throw new Error(`Falha ao deletar a tarefa. (Status: ${response.status})`);
+    throw new Error(`Failed to delete task. (Status: ${response.status})`);
   }
 }

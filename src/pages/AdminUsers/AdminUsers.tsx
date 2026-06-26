@@ -36,17 +36,17 @@ export function AdminUsers() {
       if (requestId === listRequestIdRef.current) {
         if (err instanceof Error) {
           if (err.message.includes('401')) {
-            setError('Sessão expirada. Faça login novamente.');
+            setError('Session expired. Please sign in again.');
             handleLogout();
           } else if (err.message.includes('403')) {
-            setError('Você não tem permissão ou ainda não foi aprovado.');
+            setError('You do not have permission or your account has not been approved yet.');
           } else if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
-            setError('Backend indisponível. Verifique sua conexão.');
+            setError('Server unavailable. Please check your connection.');
           } else {
-            setError('Não foi possível carregar os usuários pendentes.');
+            setError('Unable to load pending users.');
           }
         } else {
-          setError('Não foi possível carregar os usuários pendentes.');
+          setError('Unable to load pending users.');
         }
       }
     } finally {
