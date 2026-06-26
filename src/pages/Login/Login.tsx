@@ -7,8 +7,7 @@ import { ThemeToggle } from '../../components/ThemeToggle/ThemeToggle';
 import { login, createUser, ApiError } from '../../services/api';
 import { setToken, getToken } from '../../services/authStorage';
 import styles from './Login.module.css';
-import iconeEscuro from '../../assets/mutum_icone_escuro.svg';
-import iconeBranco from '../../assets/mutum_icone_branco.svg';
+
 
 type AuthMode = 'login' | 'signup';
 
@@ -69,7 +68,7 @@ export function Login() {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Ocorreu um erro inesperado.');
+        setError('An unexpected error occurred.');
       }
     } finally {
       setLoading(false);
@@ -89,10 +88,6 @@ export function Login() {
             <ThemeToggle />
           </div>
           <div className={styles.brand}>
-            <div className={styles.logoIcon}>
-              <img src={iconeEscuro} alt="Mutum" className="logoLight" />
-              <img src={iconeBranco} alt="Mutum" className="logoDark" />
-            </div>
             <h1 className={styles.title}>mutum</h1>
           </div>
           <p className={styles.subtitle}>
