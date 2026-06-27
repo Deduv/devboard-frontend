@@ -7,7 +7,7 @@ import { OrganizationInvite, OrganizationInviteListResponse } from '../types/inv
 import { User, UserListResponse } from '../types/user';
 import { getToken } from './authStorage';
 
-const API_BASE_URL = 'https://api.labprojects.dev.br';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.labprojects.dev.br';
 
 export class ApiError extends Error {
   constructor(public message: string, public status: number) {
