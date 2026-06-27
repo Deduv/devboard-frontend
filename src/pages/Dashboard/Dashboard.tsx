@@ -356,9 +356,10 @@ export function Dashboard() {
             value={activeOrganizationId || ''}
             onChange={(e) => handleOrganizationChange(Number(e.target.value))}
             aria-label="Select workspace"
+            title={organizations.find(org => org.id === activeOrganizationId)?.name || ''}
           >
             {organizations.map(org => (
-              <option key={org.id} value={org.id}>
+              <option key={org.id} value={org.id} title={org.name}>
                 {org.name}
               </option>
             ))}
